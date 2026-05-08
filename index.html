@@ -8,6 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
 <style>
 :root{
   --bg:#EEF3F7;--surface:#F5F7FA;--card:#FFFFFF;--card2:#F0F4F8;
@@ -780,8 +782,8 @@ input:focus,select:focus,textarea:focus{transition:border-color .18s,box-shadow 
 // ══════════════════════════════════════════
 // SUPABASE SETUP
 // ══════════════════════════════════════════
-const SUPABASE_URL = 'https://fhrzkyunjshsjtxelmxc.supabase.co'; // ← உன் URL
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZocnpreXVuanNoc2p0eGVsbXhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MTEwNTYsImV4cCI6MjA5MzI4NzA1Nn0.bNOyOAPcP0kBkcVJ8TrOuSiGY9pJEr7xkuqxPW25QtY'; // ← உன் anon key
+const SUPABASE_URL = 'https://ezjtwjuncwmynonhxike.supabase.co'; // ← உன் URL
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6anR3anVuY3dteW5vbmh4aWtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyMzE3NjMsImV4cCI6MjA5MzgwNzc2M30.HUZ63_ZqjydlM0h9CAdFhTI230qqag5ACL24ucOhnjE';
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ══════════════════════════════════════════
@@ -3430,5 +3432,46 @@ window.addEventListener('load', async () => {
   restoreSession();
 });
 </script>
+
+<!-- Supabase Initialize -->
+  <script>
+    const supabase = window.supabase.createClient(
+      'https://ezjtwjuncwmynonhxike.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6anR3anVuY3dteW5vbmh4aWtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyMzE3NjMsImV4cCI6MjA5MzgwNzc2M30.HUZ63_ZqjydlM0h9CAdFhTI230qqag5ACL24ucOhnjE'
+    )
+
+    // ✅ Sign Up
+    async function signUp(email, password) {
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password
+      })
+      if (error) console.log(error)
+      else console.log('Registered!', data)
+    }
+
+    // ✅ Sign In
+    async function signIn(email, password) {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+      })
+      if (error) console.log(error)
+      else console.log('Logged in!', data)
+    }
+
+    // ✅ Sign Out
+    async function signOut() {
+      await supabase.auth.signOut()
+      console.log('Logged out!')
+    }
+
+    // ✅ Current User Check
+    async function getUser() {
+      const { data } = await supabase.auth.getUser()
+      console.log(data.user)
+    }
+
+  </script>
 </body>
 </html>
