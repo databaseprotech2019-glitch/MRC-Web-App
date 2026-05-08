@@ -1236,13 +1236,15 @@ function renderTicker(infos){
 
 // ── TOAST ──
 let _toastTimer=null;
-function toggleModule(idx){
-  const body=document.getElementById('modbody-'+idx);
-  const chevron=document.getElementById('chevron-'+idx);
-  if(!body)return;
-  const isOpen=body.style.display!=='none';
-  body.style.display=isOpen?'none':'';
-  if(chevron)chevron.classList.toggle('open',!isOpen);
+function toast(msg, type='info') {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.innerHTML = msg;
+  t.className = type + ' show';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => {
+    t.className = t.className.replace('show','').trim();
+  }, 3000);
 }
 
 // ══════════════════════════════════════════
