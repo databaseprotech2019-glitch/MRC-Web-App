@@ -788,15 +788,22 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // DB SAVE — localStorage + Supabase sync
 // ══════════════════════════════════════════
 async function saveDB() {
+  // Timestamp add பண்ணு — எது newer னு compare பண்ண
+  DB.lastSaved = Date.now();
+
+  // LocalStorage-ல save பண்ணு
   localStorage.setItem('mrc_db11', JSON.stringify(DB));
+
+  // Supabase-ல sync பண்ணு
   try {
     await _supabase.from('app_data').upsert({
       id: 'main',
       data: DB,
       updated_at: new Date().toISOString()
     });
+    console.log('✅ Supabase sync done');
   } catch (err) {
-    console.warn('Supabase sync failed:', err.message);
+    console.warn('⚠️ Supabase sync failed (local save is fine):', err.message);
   }
 }
 
@@ -990,30 +997,6 @@ let currentUser=null,currentPage='dashboard',adminAttnStudent=null,feedbackPrior
 let _lightboxPhoto=null, _pendingGuideIdx=null, _adminActivityStudent=null, _adminSPStudent=null;
 const SIX_MONTHS_MS=180*24*60*60*1000;
 
-// DB migrations
-if(!DB.attendance)DB.attendance={};
-if(!DB.feedbacks)DB.feedbacks={};
-if(!DB.remarks)DB.remarks={};
-if(!DB.information)DB.information=[];
-if(!DB.progress)DB.progress={};
-if(!DB.certificates)DB.certificates={};
-if(!DB.referrals)DB.referrals=[];
-if(!DB.activities)DB.activities={};
-if(!DB.parentFeedbacks)DB.parentFeedbacks=[];
-if(!DB.freeCourses)DB.freeCourses=[];
-if(!DB.profilePics)DB.profilePics={};
-// Migrate studentsPlus from old flat array to per-student object
-if(Array.isArray(DB.studentsPlus))DB.studentsPlus={};
-if(!DB.studentsPlus)DB.studentsPlus={};
-if(!DB.settings)DB.settings={};
-if(!DB.settings.googleReviewLink)DB.settings.googleReviewLink='https://g.page/r/propeller-review';
-if(!DB.settings.communityLink)DB.settings.communityLink='https://chat.whatsapp.com/propeller-community';
-
-// Admin user
-if(!DB.users['admin@propeller.com']){
-  DB.users['admin@propeller.com']={name:'Admin',password:'admin123',role:'admin',level:'basic',email:'admin@propeller.com',joinedAt:Date.now()};
-  saveDB();
-}
 
 // ── SESSION ──
 function restoreSession(){
@@ -3399,40 +3382,51 @@ document.addEventListener('click',function(e){
   const lb=document.getElementById('photo-lightbox');
   if(lb&&!lb.classList.contains('hidden')&&e.target===lb) closeLightbox();
 });
-
 window.addEventListener('load', async () => {
   document.getElementById('auth-page').style.opacity = '0.5';
 
+  // ── STEP 1: LocalStorage-லிருந்து instant load ──
+  try {
+    const local = localStorage.getItem('mrc_db11');
+    if (local) {
+      DB = JSON.parse(local);
+    }
+  } catch(e) {
+    console.warn('LocalStorage parse failed:', e.message);
+  }
+
+  // ── STEP 2: Supabase-லிருந்து fresh data fetch ──
   try {
     const { data, error } = await _supabase
       .from('app_data')
-      .select('*')
-      .eq('id', 'main');
+      .select('data')
+      .eq('id', 'main')
+      .maybeSingle();
 
-    if (!error && data && data.length > 0 && data[0].data) {
-      DB = data[0].data;
-      localStorage.setItem('mrc_db11', JSON.stringify(DB));
-      applyDBMigrations();
-      await _supabase.from('app_data').upsert({
-        id: 'main',
-        data: DB,
-        updated_at: new Date().toISOString()
-      });
-    } else {
-      applyDBMigrations();
-      await _supabase.from('app_data').upsert({
-        id: 'main',
-        data: DB,
-        updated_at: new Date().toISOString()
-      });
-      localStorage.setItem('mrc_db11', JSON.stringify(DB));
+    if (!error && data?.data) {
+      // Supabase data புதுசா இருக்கா check பண்ணு
+      const supaTime = data.data?.lastSaved || 0;
+      const localTime = DB?.lastSaved || 0;
+
+      if (supaTime >= localTime) {
+        DB = data.data;
+        localStorage.setItem('mrc_db11', JSON.stringify(DB));
+        console.log('✅ Supabase data loaded');
+      } else {
+        console.log('✅ Local data is newer, keeping it');
+      }
     }
   } catch(e) {
-    console.warn('Supabase load failed:', e);
-    applyDBMigrations();
+    console.warn('⚠️ Supabase load failed, using local data:', e.message);
   }
 
+  // ── STEP 3: Migrations run பண்ணு (data ready ஆன பின்னாடி) ──
+  applyDBMigrations();
+
+  // ── STEP 4: UI restore ──
   document.getElementById('auth-page').style.opacity = '1';
+
+  // ── STEP 5: Session restore (எல்லாம் ready ஆன பின்னாடி மட்டும்) ──
   restoreSession();
 });
 </script>
