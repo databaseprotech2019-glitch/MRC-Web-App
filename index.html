@@ -3432,46 +3432,6 @@ window.addEventListener('load', async () => {
   restoreSession();
 });
 </script>
-
-<!-- Supabase Initialize -->
-  <script>
-    const supabase = window.supabase.createClient(
-      'https://ezjtwjuncwmynonhxike.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6anR3anVuY3dteW5vbmh4aWtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyMzE3NjMsImV4cCI6MjA5MzgwNzc2M30.HUZ63_ZqjydlM0h9CAdFhTI230qqag5ACL24ucOhnjE'
-    )
-
-    // ✅ Sign Up
-    async function signUp(email, password) {
-      const { data, error } = await supabase.auth.signUp({
-        email: email,
-        password: password
-      })
-      if (error) console.log(error)
-      else console.log('Registered!', data)
-    }
-
-    // ✅ Sign In
-    async function signIn(email, password) {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password
-      })
-      if (error) console.log(error)
-      else console.log('Logged in!', data)
-    }
-
-    // ✅ Sign Out
-    async function signOut() {
-      await supabase.auth.signOut()
-      console.log('Logged out!')
-    }
-
-    // ✅ Current User Check
-    async function getUser() {
-      const { data } = await supabase.auth.getUser()
-      console.log(data.user)
-    }
-
   </script>
 </body>
 </html>
