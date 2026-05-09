@@ -608,7 +608,7 @@ input:focus,select:focus,textarea:focus{transition:border-color .18s,box-shadow 
 <body>
 
 <!-- AUTH PAGE -->
-<div id="auth-page">
+<div id="auth-page" style="display:none">
   <div class="auth-wrap">
     <div class="auth-brand">
       <div>
@@ -3386,8 +3386,9 @@ document.addEventListener('click',function(e){
   const lb=document.getElementById('photo-lightbox');
   if(lb&&!lb.classList.contains('hidden')&&e.target===lb) closeLightbox();
 });
+
+
 window.addEventListener('load', async () => {
-  document.getElementById('auth-page').style.opacity = '0.5';
 
   // ── STEP 1: LocalStorage-லிருந்து instant load ──
   try {
@@ -3408,7 +3409,6 @@ window.addEventListener('load', async () => {
       .maybeSingle();
 
     if (!error && data?.data) {
-      // Supabase data புதுசா இருக்கா check பண்ணு
       const supaTime = data.data?.lastSaved || 0;
       const localTime = DB?.lastSaved || 0;
 
@@ -3424,15 +3424,29 @@ window.addEventListener('load', async () => {
     console.warn('⚠️ Supabase load failed, using local data:', e.message);
   }
 
-  // ── STEP 3: Migrations run பண்ணு (data ready ஆன பின்னாடி) ──
+  // ── STEP 3: Migrations run பண்ணு ──
   applyDBMigrations();
 
-  // ── STEP 4: UI restore ──
-  document.getElementById('auth-page').style.opacity = '1';
+  // ── STEP 4: Load screen மறை ──
+  document.getElementById('load-screen').style.display = 'none';
 
-  // ── STEP 5: Session restore (எல்லாம் ready ஆன பின்னாடி மட்டும்) ──
-  restoreSession();
+  // ── STEP 5: Session restore ──
+  const sessionRestored = restoreSession();
+  if (!sessionRestored) {
+    document.getElementById('auth-page').style.display = 'flex';
+  }
 });
+
 </script>
+<div id="load-screen" style="position:fixed;inset:0;background:#EEF3F7;
+z-index:9999;display:flex;align-items:center;justify-content:center;
+flex-direction:column;gap:12px">
+  <div style="width:44px;height:44px;border-radius:12px;
+  background:linear-gradient(135deg,#2196F3,#1565C0);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:900;color:#fff;
+  font-family:'Cabinet Grotesk',sans-serif">PT</div>
+  <div style="font-size:13px;color:#636E72;font-weight:600">Loading...</div>
+</div>
 </body>
 </html>
